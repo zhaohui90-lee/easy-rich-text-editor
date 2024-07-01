@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div contenteditable="true">
+    这是一个自定义的富文本编辑器。试试改变字体大小！
+  </div>
+</body>
+</html>
+<script>
+  const selection = window.getSelection()
+  console.log(selection);
+  const range = selection.getRangeAt(0)
+  console.log(range);
+</script>
