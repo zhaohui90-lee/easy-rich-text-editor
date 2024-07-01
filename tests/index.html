@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Rich Text Editor</title>
+  <style>
+    #editor {
+      border: 1px solid #ccc;
+      padding: 10px;
+      min-height: 200px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      margin: 5px;
+    }
+
+    .custom-select-wrapper {
+      position: relative;
+      user-select: none;
+      width: 200px;
+    }
+
+    .custom-select {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #394a6d;
+    }
+
+    .custom-select__trigger {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      font-size: 18px;
+      font-weight: 300;
+      color: #3b3b3b;
+      height: 40px;
+      line-height: 40px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .custom-options {
+      position: absolute;
+      display: block;
+      top: 100%;
+      left: 0;
+      right: 0;
+      border: 1px solid #394a6d;
+      border-top: 0;
+      background: #fff;
+      transition: all 0.5s;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .custom-select.open .custom-options {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+    }
+
+    .custom-option {
+      position: relative;
+      display: block;
+      padding: 0 22px;
+      cursor: pointer;
+      transition: all 0.5s;
+    }
+
+    .custom-option:hover {
+      cursor: pointer;
+      background-color: #b2b2b2;
+    }
+
+    .custom-option.selected {
+      color: #fff;
+      background-color: #305c91;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="toolbar">
+    <button onclick="format('bold')" data-command="bold" title="Bold (Ctrl+B)">B</button>
+    <button onclick="format('italic')" data-command="italic" title="Italic (Ctrl+I)">I</button>
+    <button onclick="format('underline')" data-command="underline" title="Underline (Ctrl+U)">
+      U
+    </button>
+    <div class="custom-select-wrapper">
+      <div class="custom-select">
+        <div class="custom-select__trigger"><span>选择字体大小</span></div>
+        <div class="custom-options">
+          <span class="custom-option selected" data-value="18px" style="font-size: 18px;">段落</span>
+          <span class="custom-option" data-value="32px" style="font-size: 32px;">标题 1</span>
+          <span class="custom-option" data-value="24px" style="font-size: 24px;">标题 2</span>
+          <span class="custom-option" data-value="18px" style="font-size: 18px;">标题 3</span>
+          <span class="custom-option" data-value="16px" style="font-size: 16px;">标题 4</span>
+          <span class="custom-option" data-value="13px" style="font-size: 13px;">标题 5</span>
+          <span class="custom-option" data-value="10px" style="font-size: 10px;">标题 6</span>
+        </div>
+      </div>
+    </div>
+    <div id="changeFontSize">
+      <button>-</button>
+      <input type="text" value="32px">
+      <button>+</button>
+    </div>
+    <input type="color" id="fontColor" onchange="changeFont('foreColor', this.value)" title="Font Color" />
+    <button onclick="insertLink()">Insert Link</button>
+    <button onclick="insertImage()">Insert Image</button>
+    <button onclick="insertTable()">Insert Table</button>
+    <button onclick="undo()">Undo</button>
+    <button onclick="redo()">Redo</button>
+    <button onclick="saveDocument()">Save</button>
+    <button onclick="loadDocument()">Load</button>
+    <button onclick="exportHTML()">Export HTML</button>
+    <button onclick="exportText()">Export Text</button>
+  </div>
+  <div id="editor" contenteditable="true"></div>
+
+  <script>
+    const editor = document.getElementById('editor')
+    let undoStack = []
+    let redoStack = []
+
+    document.querySelector('.custom-select-wrapper').addEventListener('click', function () {
+      this.querySelector('.custom-select').classList.toggle('open');
+    });
+
+    for (const option of document.querySelectorAll(".custom-option")) {
+      option.addEventListener('click', function () {
+        if (!this.classList.contains('selected')) {
+          this.parentNode.querySelector('.custom-option.selected').classList.remove('selected');
+          this.classList.add('selected');
+          this.closest('.custom-select').querySelector('.custom-select__trigger span').textContent = this.textContent;
+        } else {
+          this.closest('.custom-select').querySelector('.custom-select__trigger span').textContent = this.textContent;
+        }
+        format('fontSize', this.dataset.value)
+      })
+    }
+
+    window.addEventListener('click', function (e) {
+      const select = document.querySelector('.custom-select')
+      if (!select.contains(e.target)) {
+        select.classList.remove('open');
+      }
+    });
+
+    function format(command, value = null) {
+      document.execCommand(command, false, value)
+      editor.focus()
+    }
+
+    function changeFont(command, value) {
+      format(command, value)
+    }
+
+    function insertLink() {
+      const url = prompt('Enter the URL:')
+      if (url) format('createLink', url)
+    }
+
+    function insertImage() {
+      const url = prompt('Enter the image URL:')
+      if (url) format('insertImage', url)
+    }
+
+    function insertTable() {
+      const rows = prompt('Enter number of rows:')
+      const cols = prompt('Enter number of columns:')
+      if (rows && cols) {
+        let table = `<table border="1">`
+        for (let i = 0; i < rows; i++) {
+          table += '<tr>'
+          for (let j = 0; j < cols; j++) {
+            table += '<td>&nbsp;</td>'
+          }
+          table += '</tr>'
+        }
+        table += '</table>'
+        format('insertHTML', table)
+      }
+    }
+
+    // 3. 更复杂的撤销/重做系统
+    function saveState() {
+      undoStack.push(editor.innerHTML)
+      redoStack = []
+    }
+
+    document.getElementById('editor').addEventListener('input', function () {
+      undoStack.push(this.innerHTML)
+      redoStack = [] // 清空重做栈
+    })
+
+    function undo() {
+      if (undoStack.length > 1) {
+        redoStack.push(undoStack.pop())
+        document.getElementById('editor').innerHTML = undoStack[undoStack.length - 1]
+      }
+    }
+
+    function redo() {
+      if (redoStack.length > 0) {
+        undoStack.push(redoStack.pop())
+        document.getElementById('editor').innerHTML = undoStack[undoStack.length - 1]
+      }
+    }
+
+    // 4. 自定义样式应用
+    // (已通过字体大小和颜色选择器实现)
+
+    // 5. 数据持久化
+    function saveDocument() {
+      localStorage.setItem('saveDocument', editor.innerHTML)
+      console.log('document saved')
+    }
+
+    function loadDocument() {
+      const savedContent = localStorage.getItem('saveDocument')
+      if (savedContent) {
+        editor.innerHTML = savedContent
+        saveState()
+      } else {
+        alert('No saved document found.')
+      }
+    }
+
+    // 6. 改进选择和光标处理
+    editor.addEventListener('mouseup', updateToolbar)
+    editor.addEventListener('keyup', updateToolbar)
+
+    function updateToolbar() {
+      const tools = document.querySelectorAll('.toolbar button[data-command]')
+      tools.forEach(tool => {
+        const command = tool.dataset.command
+        if (document.queryCommandState(command)) {
+          tool.classList.add('active')
+        } else {
+          tool.classList.remove('active')
+        }
+      })
+    }
+
+
+    // 快捷键支持
+    editor.addEventListener('keydown', function (e) {
+      if (e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+          case 'b':
+            e.preventDefault()
+            format('bold')
+            break;
+          case 'i':
+            e.preventDefault()
+            format('italic')
+          case 'u':
+            e.preventDefault()
+            format('underline')
+          default:
+            break;
+        }
+      }
+    })
+
+    // 导出HTML
+    function exportHTML() {
+      const content = editor.innerHTML
+      downloadFile(content, 'document.html', 'text/html')
+    }
+
+    function exportText() {
+      const content = editor.innerText
+      downloadFile(content, 'document.txt', 'txt/plain')
+    }
+
+    function downloadFile(content, fileName, contentType) {
+      const a = document.createElement('a')
+      const file = new Blob([content], {
+        type: contentType
+      })
+      a.href = URL.createObjectURL(file)
+      a.download = fileName
+      a.click()
+      URL.revokeObjectURL(a.href)
+    }
+
+    // 初始化
+    editor.addEventListener('input', saveState)
+    saveState()
+  </script>
+</body>
+
+</html>

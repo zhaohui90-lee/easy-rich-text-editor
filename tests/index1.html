@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Font Size Editor</title>
+    <style>
+        #editor {
+            border: 1px solid #ccc;
+            min-height: 100px;
+            padding: 10px;
+        }
+        .toolbar {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <select id="fontSize">
+            <option value="small">小</option>
+            <option value="medium" selected>正常</option>
+            <option value="large">大</option>
+            <option value="x-large">特大</option>
+        </select>
+    </div>
+    <div id="editor" contenteditable="true">
+        这是一个自定义的富文本编辑器。试试改变字体大小！
+    </div>
+
+    <script>
+        class Command {
+            constructor(editor) {
+                this.editor = editor;
+            }
+            execute() {}
+        }
+
+        class FontSizeCommand extends Command {
+            execute(value) {
+                const model = this.editor.model;
+                model.change(writer => {
+                    model.document.selection.getSelectedBlocks().forEach(block => {
+                        writer.setAttribute('fontSize', value, block);
+                    });
+                });
+            }
+        }
+
+        class CustomEditor {
+            constructor(element) {
+                this.element = element;
+                this.commands = new Map();
+                this.model = {
+                    document: {
+                        selection: {
+                            getSelectedBlocks: () => {
+                                const selection = window.getSelection();
+                                const range = selection.getRangeAt(0);
+                                return [range.commonAncestorContainer.parentElement];
+                            }
+                        }
+                    },
+                    change: (callback) => {
+                        callback(this.writer);
+                    }
+                };
+                this.writer = {
+                    setAttribute: (attr, value, element) => {
+                        element.style[attr] = value;
+                    }
+                };
+                this.init();
+            }
+
+            init() {
+                this.commands.set('fontSize', new FontSizeCommand(this));
+                this.setupToolbar();
+            }
+
+            setupToolbar() {
+                const fontSizeSelect = document.getElementById('fontSize');
+                fontSizeSelect.addEventListener('change', (e) => {
+                    this.executeCommand('fontSize', e.target.value);
+                });
+            }
+
+            executeCommand(commandName, value) {
+                const command = this.commands.get(commandName);
+                if (command) {
+                    command.execute(value);
+                }
+            }
+        }
+
+        const editor = new CustomEditor(document.getElementById('editor'));
+    </script>
+</body>
+</html>

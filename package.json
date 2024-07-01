@@ -1,0 +1,21 @@
+{
+  "name": "easy-rich-text-editor",
+  "version": "0.1.0",
+  "description": "",
+  "main": "main.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.24.7",
+    "@babel/core": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
+    "@eslint/js": "^9.6.0",
+    "eslint": "9.x",
+    "globals": "^15.7.0",
+    "typescript-eslint": "^7.14.1"
+  }
+}
