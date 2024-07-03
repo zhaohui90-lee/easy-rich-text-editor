@@ -4,7 +4,10 @@
   "description": "",
   "main": "main.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --config webpack.config.js",
+    "start": "webpack --watch --config webpack.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . -ext .js,.jsx,.ts,.tsx"
   },
   "keywords": [],
   "author": "",
@@ -14,8 +17,13 @@
     "@babel/core": "^7.24.7",
     "@babel/preset-env": "^7.24.7",
     "@eslint/js": "^9.6.0",
+    "@types/node": "^20.14.9",
     "eslint": "9.x",
     "globals": "^15.7.0",
-    "typescript-eslint": "^7.14.1"
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^7.14.1",
+    "webpack": "^5.92.1",
+    "webpack-cli": "^5.1.4"
   }
 }
