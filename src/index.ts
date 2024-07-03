@@ -1,2 +1,2 @@
 const title = {}
-console.log(title);
+let d = ''
