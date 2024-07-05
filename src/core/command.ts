@@ -1,4 +1,4 @@
-import type Editor from "./editor";
+import type Editor from "./editor/editor";
 
 export default abstract class Command {
 
