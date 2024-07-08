@@ -4,7 +4,7 @@ import tseslint from 'typescript-eslint'
 
 export default [
   {
-    ignores: ['*.config.js']
+    ignores: ['*.config.js', '/tests/*']
   },
   {
     files: ['**/*.{js,mjs,cjs,ts}'],

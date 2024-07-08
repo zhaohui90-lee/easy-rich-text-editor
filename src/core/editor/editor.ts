@@ -1,5 +1,5 @@
 // editor -> view
-import Conversion from '../../engine/conversion'
+import Conversion from '../../engine/conversion/conversion'
 import Config from '../../utils/config'
 import Command from '../command'
 import { EditorConfig } from './editorConfig'
